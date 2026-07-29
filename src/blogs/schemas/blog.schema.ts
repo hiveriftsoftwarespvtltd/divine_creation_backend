@@ -1,16 +1,21 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
+export type BlogDocument = Blog & Document;
+
 @Schema({ timestamps: true })
-export class Banner extends Document {
+export class Blog {
   @Prop({ required: true })
   title: string;
+
+  @Prop({ default: '' })
+  date: string;
 
   @Prop({ required: true })
   image: string;
 
   @Prop({ default: '' })
-  mobileImage: string;
+  description: string;
 
   @Prop({ default: '#' })
   link: string;
@@ -19,4 +24,4 @@ export class Banner extends Document {
   active: boolean;
 }
 
-export const BannerSchema = SchemaFactory.createForClass(Banner);
+export const BlogSchema = SchemaFactory.createForClass(Blog);

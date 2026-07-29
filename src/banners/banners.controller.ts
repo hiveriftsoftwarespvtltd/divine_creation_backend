@@ -9,12 +9,12 @@ import {
   Body,
   UseGuards,
   UseInterceptors,
-  UploadedFile,
+  UploadedFiles,
   Req,
 } from '@nestjs/common';
 import { BannersService } from './banners.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { Request } from 'express';
@@ -44,21 +44,39 @@ export class BannersController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('image', { storage: storageOptions }))
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'image', maxCount: 1 },
+        { name: 'mobileImage', maxCount: 1 },
+      ],
+      { storage: storageOptions },
+    ),
+  )
   async create(
     @Body() body: any,
-    @UploadedFile() file: any,
+    @UploadedFiles()
+    files: { image?: Express.Multer.File[]; mobileImage?: Express.Multer.File[] },
     @Req() req: Request,
   ) {
     let imageUrl = body.image || '';
-    if (file) {
+    if (files?.image?.[0]) {
       const host = req.get('host');
       const protocol = req.protocol;
-      imageUrl = `${protocol}://${host}/uploads/${file.filename}`;
+      imageUrl = `${protocol}://${host}/uploads/${files.image[0].filename}`;
     }
+
+    let mobileImageUrl = body.mobileImage || '';
+    if (files?.mobileImage?.[0]) {
+      const host = req.get('host');
+      const protocol = req.protocol;
+      mobileImageUrl = `${protocol}://${host}/uploads/${files.mobileImage[0].filename}`;
+    }
+
     return this.bannersService.create({
       title: body.title,
       image: imageUrl,
+      mobileImage: mobileImageUrl,
       link: body.link || '#',
       active: body.active !== 'false',
     });
@@ -66,11 +84,20 @@ export class BannersController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('image', { storage: storageOptions }))
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'image', maxCount: 1 },
+        { name: 'mobileImage', maxCount: 1 },
+      ],
+      { storage: storageOptions },
+    ),
+  )
   async update(
     @Param('id') id: string,
     @Body() body: any,
-    @UploadedFile() file: any,
+    @UploadedFiles()
+    files: { image?: Express.Multer.File[]; mobileImage?: Express.Multer.File[] },
     @Req() req: Request,
   ) {
     const updateData: any = {};
@@ -78,12 +105,20 @@ export class BannersController {
     if (body.link !== undefined) updateData.link = body.link;
     if (body.active !== undefined) updateData.active = body.active !== 'false';
 
-    if (file) {
+    if (files?.image?.[0]) {
       const host = req.get('host');
       const protocol = req.protocol;
-      updateData.image = `${protocol}://${host}/uploads/${file.filename}`;
+      updateData.image = `${protocol}://${host}/uploads/${files.image[0].filename}`;
     } else if (body.image) {
       updateData.image = body.image;
+    }
+
+    if (files?.mobileImage?.[0]) {
+      const host = req.get('host');
+      const protocol = req.protocol;
+      updateData.mobileImage = `${protocol}://${host}/uploads/${files.mobileImage[0].filename}`;
+    } else if (body.mobileImage !== undefined) {
+      updateData.mobileImage = body.mobileImage;
     }
 
     return this.bannersService.update(id, updateData);

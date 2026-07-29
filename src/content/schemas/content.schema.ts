@@ -29,6 +29,9 @@ export class Content extends Document {
 
   @Prop({ type: Array, default: [] })
   projects: Array<any>;
+
+  @Prop({ type: Array, default: [] })
+  blogs: Array<any>;
 }
 
 export const ContentSchema = SchemaFactory.createForClass(Content);

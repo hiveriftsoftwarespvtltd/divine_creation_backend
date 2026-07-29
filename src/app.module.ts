@@ -12,6 +12,7 @@ import { ContentModule } from './content/content.module';
 import { GalleryModule } from './gallery/gallery.module';
 import { ClientsModule } from './clients/clients.module';
 import { ProjectsModule } from './projects/projects.module';
+import { BlogsModule } from './blogs/blogs.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ProjectsModule } from './projects/projects.module';
     GalleryModule,
     ClientsModule,
     ProjectsModule,
+    BlogsModule,
 
     
     
