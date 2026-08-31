@@ -26,24 +26,25 @@ $mongoUri = "mongodb://rs5045280:xbpneTRReMJD9LAc@ac-qpd9k1n-shard-00-00.sbbouj5
 node -e "const mongoose = require('mongoose'); mongoose.connect('$mongoUri').then(async () => { await mongoose.connection.db.collection('categories').deleteMany({}); mongoose.disconnect(); }).catch(e => console.error(e));"
 Start-Sleep -Seconds 2
 
-# List of 16 categories requested by user
+# List of Corporate Gifting categories for Divine Creations
 $cats = @(
-    "Fiber Buddha Statue",
-    "Fiber Animal Statue",
-    "Artificial Tree For Event",
-    "Artificial Trees",
-    "FRP Sculpture Art",
-    "Fiber Glowing Statue",
-    "Artificial Flowers Tree",
-    "Fiber God Statue",
-    "Fiber Ashoka Pillar",
-    "FRP Cartoon Statue",
-    "Fiber Bird Statue",
-    "Bhim Rao Ambedkar Statue",
-    "FRP Artificial Stone",
-    "FRP Statue",
-    "FRP Glowing Tree",
-    "Animal Statues"
+    "Corporate Gifts",
+    "Drinkware & Flasks",
+    "Gift Sets & Notebooks",
+    "Mementos & Trophies",
+    "Kitchenware & Dinner Sets",
+    "Wall Clocks",
+    "Bar Accessories",
+    "Homeware & Lunch Boxes",
+    "Photo Frames & Cherish Moments",
+    "Desktop Collection",
+    "Light & Sound Electronics",
+    "Executive Gift Sets",
+    "Annual Meeting Gifts",
+    "Diaries & Organisers",
+    "Pen Drives & Tech Accessories",
+    "Custom Corporate Gifting",
+    "Promotional Giveaways"
 )
 
 foreach ($cat in $cats) {

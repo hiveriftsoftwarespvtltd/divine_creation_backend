@@ -6,6 +6,9 @@ export class Banner extends Document {
   @Prop({ required: true })
   title: string;
 
+  @Prop({ default: '' })
+  subtitle: string;
+
   @Prop({ required: true })
   image: string;
 
@@ -14,6 +17,9 @@ export class Banner extends Document {
 
   @Prop({ default: '#' })
   link: string;
+
+  @Prop({ default: 'slider' })
+  pageKey: string;
 
   @Prop({ default: true })
   active: boolean;

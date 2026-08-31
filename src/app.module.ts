@@ -38,7 +38,7 @@ import { BlogsModule } from './blogs/blogs.module';
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => ({
         uri: config.get<string>('MONGO_URI'),
-        dbName: 'indian_mart_backend',
+        dbName: config.get<string>('DB_NAME') || 'divine_creations_db',
       }),
       inject: [ConfigService],
     }),

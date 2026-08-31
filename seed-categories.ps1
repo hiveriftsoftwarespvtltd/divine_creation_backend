@@ -30,12 +30,14 @@ $headers = @{
 }
 
 $categories = @(
-    "Fiber Buddha Statue",
-    "Fiber Animal Statue",
-    "Artificial Tree",
-    "Wooden Art",
-    "Modern Decor",
-    "Corporate Gift"
+    "Corporate Gifts",
+    "Drinkware & Flasks",
+    "Gift Sets & Notebooks",
+    "Mementos & Trophies",
+    "Kitchenware & Dinner Sets",
+    "Wall Clocks",
+    "Bar Accessories",
+    "Desktop Collection"
 )
 
 foreach ($cat in $categories) {

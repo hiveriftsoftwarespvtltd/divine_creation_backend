@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 export class AppService {
   getHello(): object {
     return {
-      message: 'Indian Mart Backend API',
+      message: 'Divine Creations Backend API',
       version: '1.0.0',
       status: 'running',
       docs: '/api/docs',

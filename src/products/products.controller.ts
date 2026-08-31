@@ -88,6 +88,8 @@ export class ProductsController {
         }
       }
 
+      const isFeatured = body.featured === 'true' || body.featured === true;
+
       return await this.productsService.create({
         title: body.title,
         description: body.description || '',
@@ -99,8 +101,9 @@ export class ProductsController {
         category: body.category || '',
         finish: body.finish !== undefined ? body.finish : 'Marble Dust White, Gold Leaf, Antique Bronze',
         sizes: body.sizes !== undefined ? body.sizes : '2 ft to 12 ft',
-        brand: body.brand !== undefined ? body.brand : 'Indian Dhamma Art',
+        brand: body.brand !== undefined ? body.brand : 'Divine Creations',
         weatherproof: body.weatherproof !== undefined ? body.weatherproof : 'Yes (Rain & UV Resistant)',
+        featured: isFeatured
       });
     } catch (error) {
       console.error('[ProductsController] Error creating product:', error);
@@ -140,6 +143,9 @@ export class ProductsController {
       if (body.sizes !== undefined) updateData.sizes = body.sizes;
       if (body.brand !== undefined) updateData.brand = body.brand;
       if (body.weatherproof !== undefined) updateData.weatherproof = body.weatherproof;
+      if (body.featured !== undefined) {
+        updateData.featured = body.featured === 'true' || body.featured === true;
+      }
 
       if (files?.image?.[0]) {
         updateData.image = `${protocol}://${host}/uploads/${files.image[0].filename}`;

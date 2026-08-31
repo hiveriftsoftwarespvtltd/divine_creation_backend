@@ -1,7 +1,7 @@
 {
-  "name": "indian-mart-backend",
+  "name": "divine-creations-backend",
   "version": "1.0.0",
-  "description": "Indian Mart Backend API built with NestJS and Mongoose",
+  "description": "Divine Creations Backend API built with NestJS and Mongoose",
   "author": "",
   "private": true,
   "license": "UNLICENSED",

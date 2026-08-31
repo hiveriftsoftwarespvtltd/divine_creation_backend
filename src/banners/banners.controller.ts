@@ -75,6 +75,8 @@ export class BannersController {
 
     return this.bannersService.create({
       title: body.title,
+      subtitle: body.subtitle || '',
+      pageKey: body.pageKey || 'slider',
       image: imageUrl,
       mobileImage: mobileImageUrl,
       link: body.link || '#',
@@ -102,6 +104,8 @@ export class BannersController {
   ) {
     const updateData: any = {};
     if (body.title !== undefined) updateData.title = body.title;
+    if (body.subtitle !== undefined) updateData.subtitle = body.subtitle;
+    if (body.pageKey !== undefined) updateData.pageKey = body.pageKey;
     if (body.link !== undefined) updateData.link = body.link;
     if (body.active !== undefined) updateData.active = body.active !== 'false';
 

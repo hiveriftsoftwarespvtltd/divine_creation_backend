@@ -7,7 +7,7 @@ export class GalleryItem extends Document {
   image: string;
 
   @Prop({ required: true })
-  category: string; // Buddha Statues, Animal Statues, Artificial Trees, God Statues, Sculpture Art, Glowing Statues, Ashoka Pillar, Others
+  category: string; // Corporate Gifts, Drinkware & Flasks, Gift Sets & Notebooks, Mementos & Trophies, Wall Clocks, Desktop Collection, Others
 }
 
 export const GalleryItemSchema = SchemaFactory.createForClass(GalleryItem);

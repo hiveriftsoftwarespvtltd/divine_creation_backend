@@ -33,11 +33,14 @@ export class Product extends Document {
   @Prop({ default: '2 ft to 12 ft' })
   sizes: string;
 
-  @Prop({ default: 'Indian Dhamma Art' })
+  @Prop({ default: 'Divine Creations' })
   brand: string;
 
   @Prop({ default: 'Yes (Rain & UV Resistant)' })
   weatherproof: string;
+
+  @Prop({ default: false })
+  featured: boolean;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

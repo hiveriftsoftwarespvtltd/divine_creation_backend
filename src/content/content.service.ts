@@ -30,4 +30,26 @@ export class ContentService implements OnModuleInit {
     }
     return content.save();
   }
+
+  async updateHero(pageKey: string, heroData: { title?: string; subtitle?: string; image?: string; mobileImage?: string }): Promise<Content> {
+    let content = await this.findOrCreate();
+    const currentHeroes = content.pageHeroes || {};
+    const existingHero = currentHeroes[pageKey] || { title: '', subtitle: '', image: '', mobileImage: '' };
+
+    const updatedHero = {
+      title: heroData.title !== undefined ? heroData.title : existingHero.title,
+      subtitle: heroData.subtitle !== undefined ? heroData.subtitle : existingHero.subtitle,
+      image: heroData.image !== undefined ? heroData.image : existingHero.image,
+      mobileImage: heroData.mobileImage !== undefined ? heroData.mobileImage : existingHero.mobileImage,
+    };
+
+    const newPageHeroes = {
+      ...currentHeroes,
+      [pageKey]: updatedHero,
+    };
+
+    content.pageHeroes = newPageHeroes;
+    content.markModified('pageHeroes');
+    return content.save();
+  }
 }
