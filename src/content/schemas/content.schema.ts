@@ -9,7 +9,7 @@ export class Content extends Document {
   @Prop({ default: 'info@divinecreations.com' })
   email: string;
 
-  @Prop({ default: '+91 85068 65563' })
+  @Prop({ default: '+91 98189 46081' })
   phone: string;
 
   @Prop({ default: 'Quality is a Culture, Service a Tradition' })
