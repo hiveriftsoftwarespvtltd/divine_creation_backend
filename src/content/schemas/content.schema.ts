@@ -3,13 +3,13 @@ import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Content extends Document {
-  @Prop({ default: 'Showroom: E-285, 1st Floor, Naraina Vihar, New Delhi | Factory: S-46, Badli Industrial Estate, Delhi' })
+  @Prop({ default: 'Office: E-285, Terrace Floor, Naraina Vihar, New Delhi | Factory: S-46, Badli Industrial Estate, Delhi' })
   address: string;
 
   @Prop({ default: 'info@divinecreations.com' })
   email: string;
 
-  @Prop({ default: '+91 98189 46081' })
+  @Prop({ default: '+91 98110 66081' })
   phone: string;
 
   @Prop({ default: 'Quality is a Culture, Service a Tradition' })
@@ -92,7 +92,7 @@ export class Content extends Document {
       },
       contact: {
         title: 'Contact Divine Creations',
-        subtitle: 'Visit Our Showroom in Naraina Vihar or Connect with Our Executive Sales Team for Customized Corporate Quotes',
+        subtitle: 'Visit Our Office in Naraina Vihar or Connect with Our Executive Sales Team for Customized Corporate Quotes',
         image: '',
         mobileImage: ''
       }
