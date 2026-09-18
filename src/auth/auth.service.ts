@@ -12,7 +12,7 @@ export class AuthService implements OnModuleInit {
     @InjectModel(User.name) private userModel: Model<User>,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   async onModuleInit() {
     await this.seedAdminUser();
