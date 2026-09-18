@@ -70,4 +70,32 @@ export class ContentController {
 
     return this.contentService.updateHero(pageKey, heroData);
   }
+
+  @Get('socials')
+  async getSocials() {
+    return this.contentService.getSocials();
+  }
+
+  @Put('socials')
+  @UseGuards(JwtAuthGuard)
+  async updateSocials(@Body() body: any) {
+    return this.contentService.updateSocials(body);
+  }
 }
+
+@Controller('socials')
+export class SocialsController {
+  constructor(private readonly contentService: ContentService) {}
+
+  @Get()
+  async getSocials() {
+    return this.contentService.getSocials();
+  }
+
+  @Put()
+  @UseGuards(JwtAuthGuard)
+  async updateSocials(@Body() body: any) {
+    return this.contentService.updateSocials(body);
+  }
+}
+

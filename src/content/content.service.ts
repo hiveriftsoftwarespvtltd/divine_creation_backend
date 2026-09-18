@@ -52,4 +52,46 @@ export class ContentService implements OnModuleInit {
     content.markModified('pageHeroes');
     return content.save();
   }
+
+  async getSocials(): Promise<Record<string, string>> {
+    const content = await this.findOrCreate();
+    const defaults: Record<string, string> = {
+      facebook: '',
+      instagram: '',
+      youtube: '',
+      whatsapp: '',
+      whatsappNumber: '',
+    };
+
+    const current = (content.socialLinks && typeof content.socialLinks === 'object' && !Array.isArray(content.socialLinks))
+      ? content.socialLinks
+      : {};
+
+    const merged = {
+      facebook: current.facebook || '',
+      instagram: current.instagram || '',
+      youtube: current.youtube || '',
+      whatsapp: current.whatsapp || '',
+      whatsappNumber: current.whatsappNumber || '',
+    };
+
+    return merged;
+  }
+
+  async updateSocials(socialData: Record<string, string>): Promise<Record<string, string>> {
+    const content = await this.findOrCreate();
+    const current = await this.getSocials();
+    const updated = {
+      facebook: socialData.facebook !== undefined ? socialData.facebook.trim() : (current.facebook || ''),
+      instagram: socialData.instagram !== undefined ? socialData.instagram.trim() : (current.instagram || ''),
+      youtube: socialData.youtube !== undefined ? socialData.youtube.trim() : (current.youtube || ''),
+      whatsapp: socialData.whatsapp !== undefined ? socialData.whatsapp.trim() : (current.whatsapp || ''),
+      whatsappNumber: socialData.whatsappNumber !== undefined ? socialData.whatsappNumber.trim() : (current.whatsappNumber || ''),
+    };
+    content.socialLinks = updated;
+    content.markModified('socialLinks');
+    await content.save();
+    return updated;
+  }
 }
+
