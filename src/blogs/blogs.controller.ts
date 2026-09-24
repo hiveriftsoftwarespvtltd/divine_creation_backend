@@ -18,8 +18,20 @@ import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { Request } from 'express';
 
+import { existsSync, mkdirSync } from 'fs';
+
+const uploadsDir = existsSync(join(process.cwd(), 'uploads'))
+  ? join(process.cwd(), 'uploads')
+  : join(__dirname, '..', '..', 'uploads');
+
+if (!existsSync(uploadsDir)) {
+  mkdirSync(uploadsDir, { recursive: true });
+}
+
 const storageOptions = diskStorage({
-  destination: join(__dirname, '..', '..', 'uploads'),
+  destination: (req, file, callback) => {
+    callback(null, uploadsDir);
+  },
   filename: (req, file, callback) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     callback(null, `blog-${uniqueSuffix}${extname(file.originalname)}`);
@@ -56,9 +68,7 @@ export class BlogsController {
   ) {
     let imageUrl = body.image || '';
     if (file) {
-      const host = req.get('host');
-      const protocol = req.protocol;
-      imageUrl = `${protocol}://${host}/uploads/${file.filename}`;
+      imageUrl = `/uploads/${file.filename}`;
     }
     return this.blogsService.create({
       title: body.title,
@@ -87,9 +97,7 @@ export class BlogsController {
     if (body.active !== undefined) updateData.active = body.active !== 'false';
 
     if (file) {
-      const host = req.get('host');
-      const protocol = req.protocol;
-      updateData.image = `${protocol}://${host}/uploads/${file.filename}`;
+      updateData.image = `/uploads/${file.filename}`;
     } else if (body.image) {
       updateData.image = body.image;
     }

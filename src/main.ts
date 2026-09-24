@@ -10,7 +10,9 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Ensure the uploads directory exists
-  const uploadsDir = join(__dirname, '..', 'uploads');
+  const uploadsDir = existsSync(join(process.cwd(), 'uploads'))
+    ? join(process.cwd(), 'uploads')
+    : join(__dirname, '..', 'uploads');
   if (!existsSync(uploadsDir)) {
     mkdirSync(uploadsDir, { recursive: true });
     console.log(`[Bootstrap] Created uploads directory at: ${uploadsDir}`);
@@ -47,7 +49,12 @@ async function bootstrap() {
         allowedOrigins.includes(cleanOrigin) ||
         allowedOrigins.includes(origin) ||
         cleanOrigin.endsWith('.divinecreations.co.in') ||
-        cleanOrigin === 'https://divinecreations.co.in'
+        cleanOrigin === 'https://divinecreations.co.in' ||
+        cleanOrigin.startsWith('http://192.168.') ||
+        cleanOrigin.startsWith('http://10.') ||
+        cleanOrigin.startsWith('http://172.') ||
+        cleanOrigin.includes('localhost') ||
+        cleanOrigin.includes('127.0.0.1')
       ) {
         return callback(null, true);
       }

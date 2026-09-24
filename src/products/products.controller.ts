@@ -21,9 +21,21 @@ import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { Request } from 'express';
 
+import { existsSync, mkdirSync } from 'fs';
+
+const uploadsDir = existsSync(join(process.cwd(), 'uploads'))
+  ? join(process.cwd(), 'uploads')
+  : join(__dirname, '..', '..', 'uploads');
+
+if (!existsSync(uploadsDir)) {
+  mkdirSync(uploadsDir, { recursive: true });
+}
+
 // Multer storage configuration
 const storageOptions = diskStorage({
-  destination: join(__dirname, '..', '..', 'uploads'),
+  destination: (req, file, callback) => {
+    callback(null, uploadsDir);
+  },
   filename: (req, file, callback) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     callback(null, `${uniqueSuffix}${extname(file.originalname)}`);
@@ -56,17 +68,14 @@ export class ProductsController {
     @Req() req: Request,
   ) {
     try {
-      const host = req.get('host');
-      const protocol = req.protocol;
-
       let imageUrl = body.image || '';
       if (files?.image?.[0]) {
-        imageUrl = `${protocol}://${host}/uploads/${files.image[0].filename}`;
+        imageUrl = `/uploads/${files.image[0].filename}`;
       }
 
       let galleryUrls: string[] = [];
       if (files?.images) {
-        galleryUrls = files.images.map(f => `${protocol}://${host}/uploads/${f.filename}`);
+        galleryUrls = files.images.map(f => `/uploads/${f.filename}`);
       } else if (body.images) {
         if (typeof body.images === 'string') {
           try {
@@ -77,6 +86,11 @@ export class ProductsController {
         } else {
           galleryUrls = body.images;
         }
+      }
+
+      // If main cover imageUrl is empty, fallback to the first gallery image
+      if (!imageUrl && galleryUrls.length > 0) {
+        imageUrl = galleryUrls[0];
       }
 
       let tagsArray = body.tags || [];
@@ -148,14 +162,14 @@ export class ProductsController {
       }
 
       if (files?.image?.[0]) {
-        updateData.image = `${protocol}://${host}/uploads/${files.image[0].filename}`;
+        updateData.image = `/uploads/${files.image[0].filename}`;
       } else if (body.image) {
         updateData.image = body.image;
       }
 
       let galleryUrls: string[] = [];
       if (files?.images) {
-        galleryUrls = files.images.map(f => `${protocol}://${host}/uploads/${f.filename}`);
+        galleryUrls = files.images.map(f => `/uploads/${f.filename}`);
         updateData.images = galleryUrls;
       } else if (body.images) {
         if (typeof body.images === 'string') {
@@ -168,6 +182,10 @@ export class ProductsController {
           galleryUrls = body.images;
         }
         updateData.images = galleryUrls;
+      }
+
+      if (!updateData.image && galleryUrls.length > 0) {
+        updateData.image = galleryUrls[0];
       }
 
       if (body.tags) {

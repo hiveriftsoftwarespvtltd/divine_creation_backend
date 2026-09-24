@@ -6,8 +6,20 @@ import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { Request } from 'express';
 
+import { existsSync, mkdirSync } from 'fs';
+
+const uploadsDir = existsSync(join(process.cwd(), 'uploads'))
+  ? join(process.cwd(), 'uploads')
+  : join(__dirname, '..', '..', 'uploads');
+
+if (!existsSync(uploadsDir)) {
+  mkdirSync(uploadsDir, { recursive: true });
+}
+
 const storageOptions = diskStorage({
-  destination: join(__dirname, '..', '..', 'uploads'),
+  destination: (req, file, callback) => {
+    callback(null, uploadsDir);
+  },
   filename: (req, file, callback) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     callback(null, `hero-${uniqueSuffix}${extname(file.originalname)}`);
@@ -53,17 +65,13 @@ export class ContentController {
     };
 
     if (files?.image?.[0]) {
-      const host = req.get('host');
-      const protocol = req.protocol;
-      heroData.image = `${protocol}://${host}/uploads/${files.image[0].filename}`;
+      heroData.image = `/uploads/${files.image[0].filename}`;
     } else if (body.image !== undefined) {
       heroData.image = body.image;
     }
 
     if (files?.mobileImage?.[0]) {
-      const host = req.get('host');
-      const protocol = req.protocol;
-      heroData.mobileImage = `${protocol}://${host}/uploads/${files.mobileImage[0].filename}`;
+      heroData.mobileImage = `/uploads/${files.mobileImage[0].filename}`;
     } else if (body.mobileImage !== undefined) {
       heroData.mobileImage = body.mobileImage;
     }
