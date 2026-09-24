@@ -18,9 +18,15 @@ async function bootstrap() {
     console.log(`[Bootstrap] Created uploads directory at: ${uploadsDir}`);
   }
 
-  // Serve static files from the uploads directory at /uploads
+  // Serve static files from the uploads directory at /uploads, /api/uploads, and /api/v1/uploads
   app.useStaticAssets(uploadsDir, {
     prefix: '/uploads',
+  });
+  app.useStaticAssets(uploadsDir, {
+    prefix: '/api/uploads',
+  });
+  app.useStaticAssets(uploadsDir, {
+    prefix: '/api/v1/uploads',
   });
 
   // Global prefix
