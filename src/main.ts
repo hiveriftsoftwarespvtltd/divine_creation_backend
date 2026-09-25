@@ -18,6 +18,35 @@ async function bootstrap() {
     console.log(`[Bootstrap] Created uploads directory at: ${uploadsDir}`);
   }
 
+  // Proxy fallback: If an uploaded image is missing locally, auto-fetch & cache from live production server
+  app.use(['/uploads', '/api/uploads', '/api/v1/uploads'], (req: any, res: any, next: any) => {
+    const rawPath = req.path || '';
+    const filename = rawPath.replace(/^\/+/, '').split('?')[0];
+    if (!filename) return next();
+
+    const localFilePath = join(uploadsDir, filename);
+    if (existsSync(localFilePath)) {
+      return next();
+    }
+
+    const https = require('https');
+    const { createWriteStream } = require('fs');
+    const remoteUrl = `https://divinecreations.co.in/api/v1/uploads/${encodeURIComponent(filename)}`;
+
+    https.get(remoteUrl, (remoteRes: any) => {
+      if (remoteRes.statusCode === 200) {
+        const fileStream = createWriteStream(localFilePath);
+        remoteRes.pipe(fileStream);
+        res.setHeader('Content-Type', remoteRes.headers['content-type'] || 'image/jpeg');
+        remoteRes.pipe(res);
+      } else {
+        next();
+      }
+    }).on('error', () => {
+      next();
+    });
+  });
+
   // Serve static files from the uploads directory at /uploads, /api/uploads, and /api/v1/uploads
   app.useStaticAssets(uploadsDir, {
     prefix: '/uploads',
