@@ -79,7 +79,10 @@ export class AboutService implements OnModuleInit {
         mkdirSync(uploadsDir, { recursive: true });
       }
 
-      const frontendAssetsDir = join(__dirname, '..', '..', '..', 'frontend', 'src', 'assets');
+      let frontendAssetsDir = join(__dirname, '..', '..', '..', 'divine_creation_frontend', 'src', 'assets');
+      if (!existsSync(frontendAssetsDir)) {
+        frontendAssetsDir = join(__dirname, '..', '..', '..', 'frontend', 'src', 'assets');
+      }
       const filesToCopy = [
         'about_corporate_gifting_craft.jpg',
         'laser_engraving_corporate_gifting.jpg',

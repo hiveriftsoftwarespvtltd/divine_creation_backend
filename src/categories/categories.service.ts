@@ -8,7 +8,7 @@ export class CategoriesService {
   constructor(@InjectModel(Category.name) private categoryModel: Model<Category>) {}
 
   async findAll(): Promise<Category[]> {
-    return this.categoryModel.find().exec();
+    return this.categoryModel.find().sort({ name: 1 }).exec();
   }
 
   async create(createDto: { name: string; featured?: boolean; image?: string }): Promise<Category> {

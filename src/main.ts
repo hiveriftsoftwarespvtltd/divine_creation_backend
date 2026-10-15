@@ -31,19 +31,29 @@ async function bootstrap() {
 
     const https = require('https');
     const { createWriteStream } = require('fs');
-    const remoteUrl = `https://divinecreations.co.in/api/v1/uploads/${encodeURIComponent(filename)}`;
 
-    https.get(remoteUrl, (remoteRes: any) => {
-      if (remoteRes.statusCode === 200) {
-        const fileStream = createWriteStream(localFilePath);
-        remoteRes.pipe(fileStream);
-        res.setHeader('Content-Type', remoteRes.headers['content-type'] || 'image/jpeg');
-        remoteRes.pipe(res);
-      } else {
+    const tryFetch = (url: string, fallback: () => void) => {
+      https.get(url, (remoteRes: any) => {
+        if (remoteRes.statusCode === 200) {
+          const fileStream = createWriteStream(localFilePath);
+          remoteRes.pipe(fileStream);
+          res.setHeader('Content-Type', remoteRes.headers['content-type'] || 'image/jpeg');
+          remoteRes.pipe(res);
+        } else {
+          fallback();
+        }
+      }).on('error', () => {
+        fallback();
+      });
+    };
+
+    const primaryUrl = `https://api.divinecreations.co.in/uploads/${encodeURIComponent(filename)}`;
+    const secondaryUrl = `https://divinecreations.co.in/api/v1/uploads/${encodeURIComponent(filename)}`;
+
+    tryFetch(primaryUrl, () => {
+      tryFetch(secondaryUrl, () => {
         next();
-      }
-    }).on('error', () => {
-      next();
+      });
     });
   });
 
