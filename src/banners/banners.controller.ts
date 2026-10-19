@@ -18,26 +18,9 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { Request } from 'express';
+import { createStorageOptions, cleanImageUrl } from '../common/upload.config';
 
-import { existsSync, mkdirSync } from 'fs';
-
-const uploadsDir = existsSync(join(process.cwd(), 'uploads'))
-  ? join(process.cwd(), 'uploads')
-  : join(__dirname, '..', '..', 'uploads');
-
-if (!existsSync(uploadsDir)) {
-  mkdirSync(uploadsDir, { recursive: true });
-}
-
-const storageOptions = diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, uploadsDir);
-  },
-  filename: (req, file, callback) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    callback(null, `banner-${uniqueSuffix}${extname(file.originalname)}`);
-  },
-});
+const storageOptions = createStorageOptions('banner');
 
 @Controller('banners')
 export class BannersController {
@@ -71,12 +54,12 @@ export class BannersController {
     files: { image?: Express.Multer.File[]; mobileImage?: Express.Multer.File[] },
     @Req() req: Request,
   ) {
-    let imageUrl = body.image || '';
+    let imageUrl = cleanImageUrl(body.image || '');
     if (files?.image?.[0]) {
       imageUrl = `/uploads/${files.image[0].filename}`;
     }
 
-    let mobileImageUrl = body.mobileImage || '';
+    let mobileImageUrl = cleanImageUrl(body.mobileImage || '');
     if (files?.mobileImage?.[0]) {
       mobileImageUrl = `/uploads/${files.mobileImage[0].filename}`;
     }
@@ -120,13 +103,13 @@ export class BannersController {
     if (files?.image?.[0]) {
       updateData.image = `/uploads/${files.image[0].filename}`;
     } else if (body.image) {
-      updateData.image = body.image;
+      updateData.image = cleanImageUrl(body.image);
     }
 
     if (files?.mobileImage?.[0]) {
       updateData.mobileImage = `/uploads/${files.mobileImage[0].filename}`;
     } else if (body.mobileImage !== undefined) {
-      updateData.mobileImage = body.mobileImage;
+      updateData.mobileImage = cleanImageUrl(body.mobileImage);
     }
 
     return this.bannersService.update(id, updateData);

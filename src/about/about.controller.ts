@@ -11,28 +11,9 @@ import {
 import { AboutService } from './about.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
+import { createStorageOptions } from '../common/upload.config';
 
-import { existsSync, mkdirSync } from 'fs';
-
-const uploadsDir = existsSync(join(process.cwd(), 'uploads'))
-  ? join(process.cwd(), 'uploads')
-  : join(__dirname, '..', '..', 'uploads');
-
-if (!existsSync(uploadsDir)) {
-  mkdirSync(uploadsDir, { recursive: true });
-}
-
-const storageOptions = diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, uploadsDir);
-  },
-  filename: (req, file, callback) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    callback(null, `about-${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`);
-  },
-});
+const storageOptions = createStorageOptions('about');
 
 @Controller('about')
 export class AboutController {

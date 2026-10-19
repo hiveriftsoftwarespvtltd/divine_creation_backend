@@ -4,6 +4,10 @@ const uri = 'mongodb://rs5045280:xbpneTRReMJD9LAc@ac-qpd9k1n-shard-00-00.sbbouj5
 
 function toRelativeUpload(url) {
   if (typeof url !== 'string' || !url) return url;
+
+
+
+  
   const idx = url.indexOf('/uploads/');
   if (idx !== -1) {
     return url.substring(idx);

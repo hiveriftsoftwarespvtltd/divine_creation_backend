@@ -14,29 +14,10 @@ import {
 import { BlogsService } from './blogs.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
 import { Request } from 'express';
+import { createStorageOptions, cleanImageUrl } from '../common/upload.config';
 
-import { existsSync, mkdirSync } from 'fs';
-
-const uploadsDir = existsSync(join(process.cwd(), 'uploads'))
-  ? join(process.cwd(), 'uploads')
-  : join(__dirname, '..', '..', 'uploads');
-
-if (!existsSync(uploadsDir)) {
-  mkdirSync(uploadsDir, { recursive: true });
-}
-
-const storageOptions = diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, uploadsDir);
-  },
-  filename: (req, file, callback) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    callback(null, `blog-${uniqueSuffix}${extname(file.originalname)}`);
-  },
-});
+const storageOptions = createStorageOptions('blog');
 
 @Controller('blogs')
 export class BlogsController {
@@ -66,7 +47,7 @@ export class BlogsController {
     @UploadedFile() file: any,
     @Req() req: Request,
   ) {
-    let imageUrl = body.image || '';
+    let imageUrl = cleanImageUrl(body.image || '');
     if (file) {
       imageUrl = `/uploads/${file.filename}`;
     }
@@ -99,7 +80,7 @@ export class BlogsController {
     if (file) {
       updateData.image = `/uploads/${file.filename}`;
     } else if (body.image) {
-      updateData.image = body.image;
+      updateData.image = cleanImageUrl(body.image);
     }
 
     return this.blogsService.update(id, updateData);

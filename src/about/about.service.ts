@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Content } from '../content/schemas/content.schema';
 import { existsSync, copyFileSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { getUploadsDir, seedCoreAssets, cleanImageUrl } from '../common/upload.config';
 
 export const DEFAULT_ABOUT = {
   overview: {
@@ -74,33 +74,10 @@ export class AboutService implements OnModuleInit {
 
   private async ensureDefaultAssets() {
     try {
-      const uploadsDir = join(__dirname, '..', '..', 'uploads');
-      if (!existsSync(uploadsDir)) {
-        mkdirSync(uploadsDir, { recursive: true });
-      }
-
-      let frontendAssetsDir = join(__dirname, '..', '..', '..', 'divine_creation_frontend', 'src', 'assets');
-      if (!existsSync(frontendAssetsDir)) {
-        frontendAssetsDir = join(__dirname, '..', '..', '..', 'frontend', 'src', 'assets');
-      }
-      const filesToCopy = [
-        'about_corporate_gifting_craft.jpg',
-        'laser_engraving_corporate_gifting.jpg',
-        'metal_etching_trophy_crafting.jpg',
-        'leatherette_gifting_embossing.jpg',
-        'executive_drinkware_set.jpg',
-      ];
-
-      for (const f of filesToCopy) {
-        const destPath = join(uploadsDir, f);
-        const srcPath = join(frontendAssetsDir, f);
-        if (!existsSync(destPath) && existsSync(srcPath)) {
-          copyFileSync(srcPath, destPath);
-          console.log(`[AboutService] Copied default asset ${f} to uploads.`);
-        }
-      }
+      const uploadsDir = getUploadsDir();
+      seedCoreAssets(uploadsDir);
     } catch (err) {
-      console.warn('[AboutService] Could not auto-copy frontend assets:', err.message);
+      console.warn('[AboutService] Could not auto-copy assets:', err.message);
     }
   }
 
@@ -154,7 +131,7 @@ export class AboutService implements OnModuleInit {
       if (parsedOverview.description !== undefined) currentAbout.overview.description = parsedOverview.description;
       if (parsedOverview.buttonText !== undefined) currentAbout.overview.buttonText = parsedOverview.buttonText;
       if (parsedOverview.buttonLink !== undefined) currentAbout.overview.buttonLink = parsedOverview.buttonLink;
-      if (parsedOverview.image !== undefined) currentAbout.overview.image = parsedOverview.image;
+      if (parsedOverview.image !== undefined) currentAbout.overview.image = cleanImageUrl(parsedOverview.image);
       if (Array.isArray(parsedOverview.highlights)) currentAbout.overview.highlights = parsedOverview.highlights;
     }
 

@@ -3,6 +3,7 @@ import { AppService } from './app.service';
 import { Response } from 'express';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { getUploadsDir } from './common/upload.config';
 
 @Controller()
 export class AppController {
@@ -21,9 +22,7 @@ export class AppController {
   // Explicit route to guarantee /api/v1/uploads/:filename works even behind cPanel / Nginx reverse proxies
   @Get('uploads/:filename')
   serveUploadFile(@Param('filename') filename: string, @Res() res: Response) {
-    const uploadsDir = existsSync(join(process.cwd(), 'uploads'))
-      ? join(process.cwd(), 'uploads')
-      : join(__dirname, '..', 'uploads');
+    const uploadsDir = getUploadsDir();
     
     // Sanitize filename to prevent directory traversal
     const safeFilename = filename.replace(/^(\.\.[\/\\])+/, '');

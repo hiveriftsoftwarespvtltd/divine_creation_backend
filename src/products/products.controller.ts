@@ -17,30 +17,11 @@ import {
 import { ProductsService } from './products.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
 import { Request } from 'express';
-
-import { existsSync, mkdirSync } from 'fs';
-
-const uploadsDir = existsSync(join(process.cwd(), 'uploads'))
-  ? join(process.cwd(), 'uploads')
-  : join(__dirname, '..', '..', 'uploads');
-
-if (!existsSync(uploadsDir)) {
-  mkdirSync(uploadsDir, { recursive: true });
-}
+import { createStorageOptions, cleanImageUrl } from '../common/upload.config';
 
 // Multer storage configuration
-const storageOptions = diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, uploadsDir);
-  },
-  filename: (req, file, callback) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    callback(null, `${uniqueSuffix}${extname(file.originalname)}`);
-  },
-});
+const storageOptions = createStorageOptions('prod');
 
 @Controller('products')
 export class ProductsController {
@@ -68,7 +49,7 @@ export class ProductsController {
     @Req() req: Request,
   ) {
     try {
-      let imageUrl = body.image || '';
+      let imageUrl = cleanImageUrl(body.image || '');
       if (files?.image?.[0]) {
         imageUrl = `/uploads/${files.image[0].filename}`;
       }
@@ -87,6 +68,7 @@ export class ProductsController {
           galleryUrls = body.images;
         }
       }
+      galleryUrls = (galleryUrls || []).map(u => cleanImageUrl(u));
 
       // If main cover imageUrl is empty, fallback to the first gallery image
       if (!imageUrl && galleryUrls.length > 0) {
@@ -142,9 +124,6 @@ export class ProductsController {
     @Req() req: Request,
   ) {
     try {
-      const host = req.get('host');
-      const protocol = req.protocol;
-
       const updateData: any = {
         title: body.title,
         material: body.material,
@@ -164,7 +143,7 @@ export class ProductsController {
       if (files?.image?.[0]) {
         updateData.image = `/uploads/${files.image[0].filename}`;
       } else if (body.image) {
-        updateData.image = body.image;
+        updateData.image = cleanImageUrl(body.image);
       }
 
       let galleryUrls: string[] = [];
@@ -181,7 +160,7 @@ export class ProductsController {
         } else {
           galleryUrls = body.images;
         }
-        updateData.images = galleryUrls;
+        updateData.images = (galleryUrls || []).map(u => cleanImageUrl(u));
       }
 
       if (!updateData.image && galleryUrls.length > 0) {

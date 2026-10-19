@@ -3,22 +3,23 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, createWriteStream } from 'fs';
 import { getConnectionToken } from '@nestjs/mongoose';
+import { getUploadsDir, seedCoreAssets } from './common/upload.config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Ensure the uploads directory exists
-  const uploadsDir = existsSync(join(process.cwd(), 'uploads'))
-    ? join(process.cwd(), 'uploads')
-    : join(__dirname, '..', 'uploads');
-  if (!existsSync(uploadsDir)) {
-    mkdirSync(uploadsDir, { recursive: true });
-    console.log(`[Bootstrap] Created uploads directory at: ${uploadsDir}`);
-  }
+  // Ensure the uploads directory exists (supports custom UPLOAD_DIR via env)
+  const uploadsDir = getUploadsDir();
+  console.log(`[Bootstrap] Using uploads directory at: ${uploadsDir}`);
 
-  // Proxy fallback: If an uploaded image is missing locally, auto-fetch & cache from live production server
+  // Automatically seed and restore core assets (hero banners, sliders, brand logos)
+  seedCoreAssets(uploadsDir);
+
+  // Safe fallback for local development only:
+  // If an uploaded image is missing locally, auto-fetch & cache from live server.
+  // NEVER run this proxy on the production server itself to avoid recursive self-request deadlocks!
   app.use(['/uploads', '/api/uploads', '/api/v1/uploads'], (req: any, res: any, next: any) => {
     const rawPath = req.path || '';
     const filename = rawPath.replace(/^\/+/, '').split('?')[0];
@@ -29,11 +30,29 @@ async function bootstrap() {
       return next();
     }
 
+    // CRITICAL: If running on production server or request host is divinecreations, DO NOT self-fetch!
+    const hostname = req.hostname || req.headers.host || '';
+    const isProduction =
+      process.env.NODE_ENV === 'production' ||
+      hostname.includes('divinecreations.co.in') ||
+      req.headers['x-fallback-fetch'] === 'true';
+
+    if (isProduction) {
+      return next(); // Return 404 cleanly via static assets handler without hanging
+    }
+
     const https = require('https');
-    const { createWriteStream } = require('fs');
 
     const tryFetch = (url: string, fallback: () => void) => {
-      https.get(url, (remoteRes: any) => {
+      const options = {
+        headers: {
+          'User-Agent': 'DivineCreations-LocalDev/1.0',
+          'x-fallback-fetch': 'true',
+        },
+        timeout: 3000,
+      };
+
+      const request = https.get(url, options, (remoteRes: any) => {
         if (remoteRes.statusCode === 200) {
           const fileStream = createWriteStream(localFilePath);
           remoteRes.pipe(fileStream);
@@ -42,7 +61,14 @@ async function bootstrap() {
         } else {
           fallback();
         }
-      }).on('error', () => {
+      });
+
+      request.on('error', () => {
+        fallback();
+      });
+
+      request.on('timeout', () => {
+        request.destroy();
         fallback();
       });
     };
