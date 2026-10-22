@@ -31,13 +31,13 @@ async function bootstrap() {
     }
 
     // CRITICAL: If running on production server or request host is divinecreations, DO NOT self-fetch!
-    const hostname = req.hostname || req.headers.host || '';
-    const isProduction =
-      process.env.NODE_ENV === 'production' ||
+    const hostname = String(req.hostname || req.headers.host || '').toLowerCase();
+    const isProductionLive =
       hostname.includes('divinecreations.co.in') ||
-      req.headers['x-fallback-fetch'] === 'true';
+      req.headers['x-fallback-fetch'] === 'true' ||
+      process.env.IS_LIVE_SERVER === 'true';
 
-    if (isProduction) {
+    if (isProductionLive) {
       return next(); // Return 404 cleanly via static assets handler without hanging
     }
 
@@ -49,15 +49,21 @@ async function bootstrap() {
           'User-Agent': 'DivineCreations-LocalDev/1.0',
           'x-fallback-fetch': 'true',
         },
-        timeout: 3000,
+        timeout: 5000,
       };
 
       const request = https.get(url, options, (remoteRes: any) => {
         if (remoteRes.statusCode === 200) {
-          const fileStream = createWriteStream(localFilePath);
-          remoteRes.pipe(fileStream);
-          res.setHeader('Content-Type', remoteRes.headers['content-type'] || 'image/jpeg');
-          remoteRes.pipe(res);
+          try {
+            const fileStream = createWriteStream(localFilePath);
+            fileStream.on('error', (err: any) => console.error('[UploadFallback] File stream error:', err));
+            remoteRes.pipe(fileStream);
+            res.setHeader('Content-Type', remoteRes.headers['content-type'] || 'image/jpeg');
+            remoteRes.pipe(res);
+          } catch (e) {
+            console.error('[UploadFallback] Stream error:', e);
+            fallback();
+          }
         } else {
           fallback();
         }

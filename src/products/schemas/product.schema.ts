@@ -41,6 +41,9 @@ export class Product extends Document {
 
   @Prop({ default: false })
   featured: boolean;
+
+  @Prop({ default: false })
+  isOurProduct: boolean;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

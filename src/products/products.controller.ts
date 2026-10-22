@@ -85,6 +85,7 @@ export class ProductsController {
       }
 
       const isFeatured = body.featured === 'true' || body.featured === true;
+      const isOurProduct = body.isOurProduct === 'true' || body.isOurProduct === true || body.ourProduct === 'true' || body.ourProduct === true;
 
       return await this.productsService.create({
         title: body.title,
@@ -99,7 +100,8 @@ export class ProductsController {
         sizes: body.sizes !== undefined ? body.sizes : '2 ft to 12 ft',
         brand: body.brand !== undefined ? body.brand : 'Divine Creations',
         weatherproof: body.weatherproof !== undefined ? body.weatherproof : 'Yes (Rain & UV Resistant)',
-        featured: isFeatured
+        featured: isFeatured,
+        isOurProduct: isOurProduct
       });
     } catch (error) {
       console.error('[ProductsController] Error creating product:', error);
@@ -138,6 +140,10 @@ export class ProductsController {
       if (body.weatherproof !== undefined) updateData.weatherproof = body.weatherproof;
       if (body.featured !== undefined) {
         updateData.featured = body.featured === 'true' || body.featured === true;
+      }
+      if (body.isOurProduct !== undefined || body.ourProduct !== undefined) {
+        const ourProdVal = body.isOurProduct !== undefined ? body.isOurProduct : body.ourProduct;
+        updateData.isOurProduct = ourProdVal === 'true' || ourProdVal === true;
       }
 
       if (files?.image?.[0]) {
